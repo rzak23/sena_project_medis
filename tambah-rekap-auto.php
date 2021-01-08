@@ -66,7 +66,7 @@ if (isset($_POST["btn_simpan_rekap"])) {
         </button>
       </div>
       <!-- Modal Body -->
-      <form action="" method="post">
+      <form action="" method="post" id="form">
         <div class="modal-body row">
           <div class="col-md-12">
             <input type="text" name="id_rekap" id="id_rekap" value="<?= $id_rekap; ?>" hidden>
@@ -81,7 +81,7 @@ if (isset($_POST["btn_simpan_rekap"])) {
             <div class="form-group row">
               <label for="shift_rekap" class="col-md-5 col-form-label">Shift Rekap</label>
                 <div class="col-md-7">
-                  <select name="shift_rekap" onchange="gantiShift(value);" id="shift_rekap" class="js-example-placeholder-single js-states form-control" required>
+                  <select name="shift_rekap1" onchange="gantiShift();" id="shift_rekap1" class="js-example-placeholder-single js-states form-control" required>
                     <option></option>
                     <option value="Pagi">Pagi</option>
                     <option value="Siang">Siang</option>
@@ -93,31 +93,15 @@ if (isset($_POST["btn_simpan_rekap"])) {
             <div class="form-group row">
               <label for="dokter_rekap1" class="col-md-5 col-form-label">Dokter Jaga<span class="text-danger">*</span></label>
               <div class="col-md-7">
-                <?php
-                $data   = count(query("SELECT * FROM tabel_medis WHERE tanggal_medis = '$tgl_rekap' AND shift_medis = '$waktu_rekap'"));
-                if ($data == 0) {
-                  $nama_dokter = "";
-                } else {
-                  $dokter = query("SELECT rm.*, dr.* FROM (tabel_medis rm INNER JOIN tabel_dokter dr ON rm.id_dokter = dr.id_dokter)
-                                  WHERE rm.tanggal_medis = '$tgl_rekap' AND rm.shift_medis = '$waktu_rekap'")[0];
-                  $nama_dokter = $dokter["nama_dokter"];
-                }
-                ?>
-                <input type="text" name="dokter_rekap1" id="dokter_rekap1" class="form-control" value="<?= $dokter["id_dokter"]; ?>" hidden>
-                <input type="text" class="form-control" value="<?= $nama_dokter; ?>" readonly>
+                <input type="text" name="dokter_rekap1" id="dokter_rekap1" class="form-control" value="" hidden>
+                <input type="text" class="form-control" id="dokter_nama" value="" readonly>
               </div>
             </div>
             <!-- Jumlah Umum -->
             <div class="form-group row">
               <label for="umum_rekap" class="col-md-5 col-form-label">Pasien UMUM<span class="text-danger">*</span></label>
               <div class="col-md-4 input-group">
-                <?php
-                $jml_umum = query("SELECT COUNT(id_medis) AS pasien_umum FROM tabel_medis WHERE
-                                  tanggal_medis = '$tgl_rekap'    AND 
-                                  shift_medis   = '$waktu_rekap'  AND
-                                  tipe_pasien   = 'Umum'")[0];
-                ?>
-                <input type="text" name="umum_rekap" id="umum_rekap" class="form-control text-center" value="<?= $jml_umum["pasien_umum"]; ?>" readonly>
+                <input type="text" name="umum_rekap" id="umum_rekap" class="form-control text-center" value="" readonly>
                 <div class="input-group-append">
                   <span class="input-group-text">Orang</span>
                 </div>
@@ -127,13 +111,7 @@ if (isset($_POST["btn_simpan_rekap"])) {
             <div class="form-group row">
               <label for="bpjs_rekap" class="col-md-5 col-form-label">Pasien BPJS<span class="text-danger">*</span></label>
               <div class="col-md-4 input-group">
-                <?php
-                $jml_bpjs = query("SELECT COUNT(id_medis) AS pasien_bpjs FROM tabel_medis WHERE
-                                  tanggal_medis = '$tgl_rekap'    AND
-                                  shift_medis   = '$waktu_rekap'  AND
-                                  tipe_pasien   = 'Bpjs'")[0];
-                ?>
-                <input type="text" name="bpjs_rekap" id="bpjs_rekap" class="form-control text-center" value="<?= $jml_bpjs["pasien_bpjs"]; ?>" readonly>
+                <input type="text" name="bpjs_rekap" id="bpjs_rekap" class="form-control text-center" value="" readonly>
                 <div class="input-group-append">
                   <span class="input-group-text">Orang</span>
                 </div>
@@ -143,13 +121,7 @@ if (isset($_POST["btn_simpan_rekap"])) {
             <div class="form-group row">
               <label for="aqua_rekap" class="col-md-5 col-form-label">Pasien AQUA<span class="text-danger">*</span></label>
               <div class="col-md-4 input-group">
-                <?php
-                $jml_aqua = query("SELECT COUNT(id_medis) AS pasien_aqua FROM tabel_medis WHERE
-                                  tanggal_medis = '$tgl_rekap'    AND
-                                  shift_medis   = '$waktu_rekap'  AND
-                                  tipe_pasien   = 'Aqua'")[0];
-                ?>
-                <input type="text" name="aqua_rekap" id="aqua_rekap" class="form-control text-center" value="<?= $jml_aqua["pasien_aqua"]; ?>" readonly>
+                <input type="text" name="aqua_rekap" id="aqua_rekap" class="form-control text-center" value="" readonly>
                 <div class="input-group-append">
                   <span class="input-group-text">Orang</span>
                 </div>
@@ -159,11 +131,7 @@ if (isset($_POST["btn_simpan_rekap"])) {
             <div class="form-group row">
               <label for="jml_pasien" class="col-md-5 col-form-label">Jumlah Pasien<span class="text-danger">*</span></label>
               <div class="col-md-4 input-group">
-                <?php
-                $jml_kunjungan = query("SELECT COUNT(id_medis) AS kunjungan FROM tabel_medis WHERE
-                                        tanggal_medis = '$tgl_rekap'  AND shift_medis   = '$waktu_rekap'")[0];
-                ?>
-                <input type="text" name="jml_pasien" id="jml_pasien" class="form-control text-center" value="<?= $jml_kunjungan["kunjungan"]; ?>" readonly>
+                <input type="text" name="jml_pasien" id="jml_pasien" class="form-control text-center" value="" readonly>
                 <div class="input-group-append">
                   <span class="input-group-text">Orang</span>
                 </div>
@@ -176,12 +144,7 @@ if (isset($_POST["btn_simpan_rekap"])) {
                 <div class="input-group-prepend">
                   <span class="input-group-text">Rp.</span>
                 </div>
-                <?php
-                $total_bill = query("SELECT SUM(biaya_medis) AS biaya FROM tabel_medis WHERE
-                                    tanggal_medis = '$tgl_rekap' AND shift_medis = '$waktu_rekap'")[0];
-                $total      = number_format($total_bill["biaya"], 0, ".", ".");
-                ?>
-                <input type="text" name="jml_biaya" id="jml_biaya" class="form-control" value="<?= $total; ?>" readonly>
+                <input type="text" name="jml_biaya" id="jml_biaya" class="form-control" value="" readonly>
               </div>
             </div>
             <hr>
@@ -203,7 +166,34 @@ if (isset($_POST["btn_simpan_rekap"])) {
   var $shiftRekap;
 
   function gantiShift($shiftPilih){
-    $shiftRekap = $shiftPilih;
+    var shiftRekap = document.getElementById('shift_rekap1').value;
+    var tgl = document.getElementById('tgl_rekap').value;
+    
+    $.ajax({
+        url: "hitung-rekap.php",
+        type:"post",
+        dataType: 'json',
+        data:{
+        	shift:shiftRekap,
+        	tgl:tgl
+        },
+        cache:false,
+        success:function(result){
+          	$('#jml_biaya').val(result['biaya']);
+          	$('#aqua_rekap').val(result['cntAqua']);
+          	$('#bpjs_rekap').val(result['cntBpjs']);
+          	$('#umum_rekap').val(result['cntUmum']);
+          	$('#jml_pasien').val(result['cntKunjungan']);
+          	if(result['dokter'] == null || result['dokter'] == ""){
+          		$('#dokter_nama').val('');
+          		$('#dokter_rekap1').val('');
+          	}else{
+          		$('#dokter_nama').val(result['dokter'][0]['nama_dokter']);
+          		$('#dokter_rekap1').val(result['dokter'][0]['id_dokter']);
+          	}
+          	// console.log(result['dokter'][0]['nama_dokter']);
+        }
+    });
 
     /*
     sessionStorage.setItem('waktuRekap',$shiftRekap);
